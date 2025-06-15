@@ -1,0 +1,16 @@
+{
+  "total_recipes": 50000,
+  "chunk_files": [
+    "data/processed/recipes_chunk_0.json",
+    "data/processed/recipes_chunk_1.json",
+    "data/processed/recipes_chunk_2.json",
+    "data/processed/recipes_chunk_3.json",
+    "data/processed/recipes_chunk_4.json",
+    "data/processed/recipes_chunk_5.json",
+    "data/processed/recipes_chunk_6.json",
+    "data/processed/recipes_chunk_7.json",
+    "data/processed/recipes_chunk_8.json",
+    "data/processed/recipes_chunk_9.json"
+  ],
+  "processing_complete": true
+}

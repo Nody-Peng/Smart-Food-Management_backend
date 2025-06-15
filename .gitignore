@@ -1,0 +1,12 @@
+# 忽略 data/embeddings 資料夾
+data/embeddings/
+
+# 忽略 recipes_data.csv
+data/recipes_data.csv
+
+# 忽略 services 資料夾中的 rag_service.py 與 vector_store.py
+services/rag_service.py
+services/vector_store.py
+
+# 忽略 scripts 資料夾中的 initialize_rag.py
+scripts/initialize_rag.py
