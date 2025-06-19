@@ -1,6 +1,6 @@
 # backend/services/simple_rag_service.py
 import logging
-from typing import List, Dict, Any
+from typing import List, Dict
 import google.generativeai as genai
 from .simple_vector_store import SimpleRecipeVectorStore
 
@@ -8,47 +8,40 @@ logger = logging.getLogger(__name__)
 
 class SimpleRecipeRAGService:
     def __init__(self, api_key: str):
-        self.vector_store = SimpleRecipeVectorStore(api_key='AIzaSyCintS7lzcW1ycKenGqafbsy2xUMOxJSa4')
+        # ✅ 不再傳入 API 金鑰給 vector store
+        self.vector_store = SimpleRecipeVectorStore()
+        
+        # 初始化 Gemini 模型，用於生成新食譜（非翻譯）
         genai.configure(api_key=api_key)
         self.model = genai.GenerativeModel('gemini-1.5-flash')
         
-        # 嘗試載入現有索引
         if not self.vector_store.load_index():
             logger.warning("找不到現有的向量索引，需要先建立索引")
     
     def initialize_vector_store(self):
-        """初始化向量資料庫"""
         logger.info("開始初始化向量資料庫...")
         self.vector_store.build_index_from_chunks()
         logger.info("向量資料庫初始化完成")
     
     def search_recipes(self, query: str, max_results: int = 5) -> List[Dict]:
-        """搜尋相關食譜"""
         if not self.vector_store.is_built:
             raise ValueError("向量索引尚未建立，請先執行初始化")
         
         results = self.vector_store.search(query, k=max_results)
-        
-        # 格式化結果
-        formatted_results = []
-        for recipe, score in results:
-            formatted_results.append({
+        return [
+            {
                 'recipe': recipe,
                 'similarity_score': score
-            })
-        
-        return formatted_results
+            }
+            for recipe, score in results
+        ]
     
     def generate_enhanced_recipe(self, user_ingredients: List[str], 
                                 cuisine: str = "chinese", 
                                 cooking_time: str = "30") -> str:
-        """使用 RAG 生成增強的食譜"""
-        
-        # 1. 搜尋相關食譜
         ingredients_query = " ".join(user_ingredients)
         similar_recipes = self.search_recipes(ingredients_query, max_results=3)
         
-        # 2. 準備參考食譜文字
         reference_recipes = []
         for item in similar_recipes:
             recipe = item['recipe']
@@ -59,9 +52,7 @@ class SimpleRecipeRAGService:
 """
             reference_recipes.append(reference_text)
         
-        # 3. 建構增強的提示詞
         reference_text = "\n---\n".join(reference_recipes)
-        
         cuisine_map = {
             "chinese": "中式",
             "japanese": "日式", 
@@ -70,7 +61,6 @@ class SimpleRecipeRAGService:
             "thai": "泰式",
             "italian": "義式"
         }
-        
         cuisine_name = cuisine_map.get(cuisine, "中式")
         ingredients_text = "、".join(user_ingredients)
         
@@ -94,7 +84,6 @@ class SimpleRecipeRAGService:
 
 請用繁體中文回答，格式清楚易讀。
 """
-
         try:
             response = self.model.generate_content(prompt)
             return response.text.strip()

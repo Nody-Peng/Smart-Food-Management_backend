@@ -12,7 +12,6 @@ logger = logging.getLogger(__name__)
 class ImageRecognitionService:
     def __init__(self, api_key: str):
         genai.configure(api_key=api_key)
-        # 🔥 使用新的模型！
         self.model = genai.GenerativeModel('gemini-1.5-flash')
     
     def analyze_food_image(self, image_data: bytes) -> List[str]:
